@@ -11,7 +11,9 @@ pub const COLUMNS: usize = 80;
 /// Leading spaces are kept on the first line (to allow indenting) and
 /// dropped from the others.
 ///
-/// Works on bytes so that arbitrary player input can't split a `char`.
+/// Works on bytes, as the original did, so it never panics on player input.
+/// The cost is that a cut can fall inside a multi-byte character (say, in
+/// a long word of `é`s), and widths are counted in bytes, not characters.
 pub fn wrap(s: &str, columns: usize) -> Vec<&[u8]> {
     let width = columns.max(2) - 1;
     let s = s.as_bytes();

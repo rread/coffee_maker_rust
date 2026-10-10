@@ -10,7 +10,7 @@ use std::time::Duration;
 use coffee_maker_tables::{Game, Pacer};
 use gloo_timers::future::sleep;
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::spawn_local;
+use wasm_bindgen_futures::{JsFuture, spawn_local};
 use web_sys::{Document, HtmlButtonElement, HtmlElement, HtmlInputElement, KeyboardEvent};
 
 /// Something the game produced: text to print, or a pause before the rest.
@@ -241,7 +241,8 @@ fn main() {
     let on_key = {
         let app = app.clone();
         Closure::<dyn FnMut(KeyboardEvent)>::new(move |e: KeyboardEvent| {
-            if e.key() == "Enter" {
+            // An Enter that confirms an input-method composition isn't a submit.
+            if e.key() == "Enter" && !e.is_composing() {
                 e.prevent_default();
                 submit(&app);
             }
@@ -275,5 +276,12 @@ fn main() {
         .expect("click listener");
     on_again.forget();
 
-    new_game(&app);
+    // Wait for the web font before the first measurement, so the opening
+    // text is wrapped for the font it's shown in.
+    spawn_local(async move {
+        if let Ok(ready) = page.document.fonts().ready() {
+            JsFuture::from(ready).await.ok();
+        }
+        new_game(&app);
+    });
 }

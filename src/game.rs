@@ -556,7 +556,7 @@ impl<W: Write, P: Pacer> Game<W, P> {
     }
 }
 
-/// Read one line, without its `\n`. `None` at end of input.
+/// Read one line, without its `\n` or `\r\n`. `None` at end of input.
 fn read_line(input: &mut impl BufRead) -> io::Result<Option<String>> {
     let mut buf = Vec::new();
     if input.read_until(b'\n', &mut buf)? == 0 {
@@ -564,6 +564,9 @@ fn read_line(input: &mut impl BufRead) -> io::Result<Option<String>> {
     }
     if buf.last() == Some(&b'\n') {
         buf.pop();
+        if buf.last() == Some(&b'\r') {
+            buf.pop();
+        }
     }
     Ok(Some(String::from_utf8_lossy(&buf).into_owned()))
 }

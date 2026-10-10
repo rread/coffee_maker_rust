@@ -7,8 +7,12 @@ use std::path::Path;
 
 use coffee_maker_tables::{Game, NoPause};
 
+fn dir() -> std::path::PathBuf {
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/transcripts")
+}
+
 fn check(name: &str) {
-    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/transcripts");
+    let dir = dir();
     let input = fs::read(dir.join(format!("{name}.in"))).unwrap();
     let expected = fs::read(dir.join(format!("{name}.out"))).unwrap();
     let mut out = Vec::new();
@@ -70,4 +74,14 @@ fn narrower_columns() {
         out.starts_with("You are in a huge kitchen with\nred-brick walls."),
         "{out}"
     );
+}
+
+#[test]
+fn windows_line_endings() {
+    let unix = fs::read(dir().join("walkthrough.in")).unwrap();
+    let crlf = String::from_utf8(unix).unwrap().replace('\n', "\r\n");
+    let expected = fs::read(dir().join("walkthrough.out")).unwrap();
+    let mut out = Vec::new();
+    Game::new(&mut out, NoPause).run(crlf.as_bytes()).unwrap();
+    assert!(out == expected, "CRLF input should play the same game");
 }

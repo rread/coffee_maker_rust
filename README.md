@@ -39,9 +39,9 @@ procedure of the same name.
 
 The terminal version's game logic, messages (typos included), wrapping and
 pacing match the Ada original. The only differences are that whole lines
-are read (no 100-character buffer) and end of input quits cleanly. Golden
-transcripts in `tests/transcripts/`, derived from the Ada source, check
-this byte for byte.
+are read (no 100-character buffer), a `\r` before the newline is ignored,
+and end of input quits cleanly. Golden transcripts in `tests/transcripts/`,
+derived from the Ada source, check this byte for byte.
 
 The browser version drops the opening banner (`Begin`, the dictionary
 size, `***`), numbers the prompt (`[1] ? `), and on screens too narrow for
