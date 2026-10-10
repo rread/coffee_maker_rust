@@ -21,7 +21,15 @@
       --ribbon: #b42a1f;
       --lh: 1.5em;
       --strip: 2.5em;
+      --gutter: 1em;
+      --margin: calc(var(--strip) + var(--gutter));
       color-scheme: light;
+    }
+    @media (max-width: 600px) {
+      :root {
+        --strip: 1.5em;
+        --gutter: 0.5em;
+      }
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -39,8 +47,9 @@
 
     html, body { margin: 0; height: 100%; }
     body {
-      /* 80 columns of text plus gutters and tractor strips = 55em. */
-      font-size: clamp(10px, calc((100vw - 32px) / 55), 16px);
+      /* 80 columns of text plus gutters and tractor strips = 55em. Below
+         that the game wraps to however many columns fit. */
+      font-size: clamp(13px, calc((100vw - 32px) / 55), 16px);
       font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
       background: var(--desk);
       color: var(--desk-ink);
@@ -81,7 +90,7 @@
       width: 55em;
       max-width: calc(100vw - 32px);
       margin: 0 auto;
-      overflow: auto;
+      overflow: hidden auto;
       overscroll-behavior: contain;
       padding: var(--lh) 0;
       cursor: text;
@@ -110,13 +119,22 @@
 
     #out {
       margin: 0;
-      padding: 0 calc(var(--strip) + 1em);
-      width: max-content;
-      min-width: 80ch;
+      padding: 0 var(--margin);
       font: inherit;
       line-height: var(--lh);
-      white-space: pre;
+      /* The game wraps its paragraphs to fit; this catches the few short
+         fixed lines (and long typed words) that still don't. */
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
       color: var(--ink);
+    }
+    /* Measures how many characters fit across the paper. */
+    #measure {
+      margin: 0 var(--margin);
+      height: 0;
+      overflow: hidden;
+      visibility: hidden;
+      white-space: pre;
     }
     .typed { color: var(--ribbon); }
 
@@ -124,7 +142,7 @@
       font: inherit;
       line-height: var(--lh);
       height: var(--lh);
-      width: 40ch;
+      width: min(40ch, calc(100% - 8ch));
       margin: 0;
       padding: 0;
       border: 0;
@@ -134,10 +152,9 @@
       caret-color: var(--ribbon);
     }
     #cmd:focus { outline: none; box-shadow: inset 0 -1px var(--ribbon); }
-
-    .narrow-only { display: none; }
-    @media (max-width: 540px) and (orientation: portrait) {
-      .narrow-only { display: block; }
+    /* At 16px, iOS doesn't zoom the page when the prompt gets focus. */
+    @media (max-width: 600px) {
+      #cmd { font-size: 16px; }
     }
 
     #again {
@@ -158,11 +175,11 @@
     <h1>Coffee Maker</h1>
   </header>
   <main id="paper">
+    <div id="measure" aria-hidden="true"><span id="ruler">0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000</span></div>
     <pre id="out"><input id="cmd" type="text" aria-label="Command" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="send"></pre>
   </main>
   <footer>
     <p>Type one or two words, like <em>look</em>, <em>north</em> or <em>take kettle</em>, and press Enter. Type <em>@quit</em> to stop.</p>
-    <p class="narrow-only">The game prints 80-column lines. Turn your phone sideways to see them whole.</p>
     <p>A Rust and WebAssembly port of <a href="https://github.com/c3mnr0nz0yfgvxg4gi0sxhnwl9/coffee_maker_ada">coffee_maker_ada</a>, a parser game written in Ada. <a href="https://github.com/rread/coffee_maker_rust">Source code</a>.</p>
     <button id="again" type="button" hidden>Play again</button>
   </footer>

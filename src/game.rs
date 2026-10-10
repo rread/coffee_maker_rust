@@ -9,7 +9,7 @@ use enum_map::{EnumMap, enum_map};
 use crate::Pacer;
 use crate::parser::{Command, TooManyWords, Words};
 use crate::tables;
-use crate::text::wrap;
+use crate::text::{self, wrap};
 use crate::thing::{Flags, Strings, Thing, Thing::*, ThingToThing};
 
 const LINE_PAUSE: Duration = Duration::from_millis(100);
@@ -47,6 +47,8 @@ pub struct Game<W, P> {
     numbered_prompts: bool,
     /// Lines the player has entered so far.
     lines_entered: u32,
+    /// Paragraphs are wrapped to lines of at most this many bytes.
+    columns: usize,
 }
 
 impl<W: Write, P: Pacer> Game<W, P> {
@@ -94,6 +96,7 @@ impl<W: Write, P: Pacer> Game<W, P> {
             finished: false,
             numbered_prompts: false,
             lines_entered: 0,
+            columns: text::COLUMNS,
         }
     }
 
@@ -102,6 +105,12 @@ impl<W: Write, P: Pacer> Game<W, P> {
     pub fn with_numbered_prompts(mut self) -> Self {
         self.numbered_prompts = true;
         self
+    }
+
+    /// Wrap paragraphs printed from now on to `columns` instead of the
+    /// original 80, using the same rule.
+    pub fn set_columns(&mut self, columns: usize) {
+        self.columns = columns;
     }
 
     /// Play until the player wins, types `@quit`, or input ends.
@@ -216,7 +225,7 @@ impl<W: Write, P: Pacer> Game<W, P> {
         if s.is_empty() {
             return writeln!(self.out);
         }
-        for line in wrap(s) {
+        for line in wrap(s, self.columns) {
             self.out.write_all(line)?;
             self.out.write_all(b"\n")?;
             self.out.flush()?;

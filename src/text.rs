@@ -1,23 +1,24 @@
 //! Paragraph word-wrapping.
 
-/// Lines are broken at or before this offset from the start of the line.
-const WIDTH: usize = 79;
+/// The original's line length. Lines hold up to 80 bytes.
+pub const COLUMNS: usize = 80;
 
-/// Break `s` into lines.
+/// Break `s` into lines of at most `columns` bytes.
 ///
-/// Each line ends just before the last run of spaces within `WIDTH` bytes
-/// of its start, so a line holds at most `WIDTH + 1` bytes. If no space
-/// falls in the back half of that window, the line is cut mid-word at
-/// `WIDTH / 2 + 1` bytes. Leading spaces are kept on the first line (to
-/// allow indenting) and dropped from the others.
+/// With `width = columns - 1`, each line ends just before the last run of
+/// spaces within `width` bytes of its start. If no space falls in the back
+/// half of that window, the line is cut mid-word at `width / 2 + 1` bytes.
+/// Leading spaces are kept on the first line (to allow indenting) and
+/// dropped from the others.
 ///
 /// Works on bytes so that arbitrary player input can't split a `char`.
-pub fn wrap(s: &str) -> Vec<&[u8]> {
+pub fn wrap(s: &str, columns: usize) -> Vec<&[u8]> {
+    let width = columns.max(2) - 1;
     let s = s.as_bytes();
     let mut lines = Vec::new();
     let mut start = 0;
     while start < s.len() {
-        let stop = find_stop(s, start);
+        let stop = find_stop(s, start, width);
         lines.push(&s[start..=stop]);
         start = stop + 1;
         while start < s.len() && s[start] == b' ' {
@@ -28,13 +29,13 @@ pub fn wrap(s: &str) -> Vec<&[u8]> {
 }
 
 /// Index of the last byte of the line beginning at `start`.
-fn find_stop(s: &[u8], start: usize) -> usize {
+fn find_stop(s: &[u8], start: usize, width: usize) -> usize {
     let last = s.len() - 1;
-    if last <= start + WIDTH {
+    if last <= start + width {
         return last;
     }
-    let mut stop = start + WIDTH;
-    while stop > start + WIDTH / 2 && s[stop] != b' ' {
+    let mut stop = start + width;
+    while stop > start + width / 2 && s[stop] != b' ' {
         stop -= 1;
     }
     while stop > start && s[stop] == b' ' {
@@ -48,7 +49,7 @@ mod tests {
     use super::*;
 
     fn lines(s: &str) -> Vec<String> {
-        wrap(s)
+        wrap(s, COLUMNS)
             .into_iter()
             .map(|l| String::from_utf8(l.to_vec()).unwrap())
             .collect()
@@ -56,7 +57,7 @@ mod tests {
 
     #[test]
     fn empty() {
-        assert!(wrap("").is_empty());
+        assert!(wrap("", COLUMNS).is_empty());
     }
 
     #[test]
@@ -112,9 +113,27 @@ mod tests {
     }
 
     #[test]
+    fn narrower_columns_use_the_same_rule() {
+        let s = "You see an electric kettle, a pour-over funnel that needs cleaning.";
+        let narrow: Vec<_> = wrap(s, 30)
+            .into_iter()
+            .map(|l| String::from_utf8(l.to_vec()).unwrap())
+            .collect();
+        assert_eq!(
+            narrow,
+            [
+                "You see an electric kettle, a",
+                "pour-over funnel that needs",
+                "cleaning."
+            ]
+        );
+        assert!(wrap(&"x".repeat(100), 30).iter().all(|l| l.len() <= 30));
+    }
+
+    #[test]
     fn non_ascii_never_panics() {
         let s = "é".repeat(100);
-        let total: usize = wrap(&s).iter().map(|l| l.len()).sum();
+        let total: usize = wrap(&s, COLUMNS).iter().map(|l| l.len()).sum();
         assert_eq!(total, s.len());
     }
 }

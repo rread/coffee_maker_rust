@@ -59,6 +59,10 @@ struct Page {
     out: HtmlElement,
     input: HtmlInputElement,
     again: HtmlButtonElement,
+    /// An empty strip as wide as the text column.
+    measure: HtmlElement,
+    /// 100 characters inside `measure`, for the width of one.
+    ruler: HtmlElement,
 }
 
 impl Page {
@@ -76,6 +80,8 @@ impl Page {
             out: get("out").unchecked_into(),
             input: get("cmd").unchecked_into(),
             again: get("again").unchecked_into(),
+            measure: get("measure").unchecked_into(),
+            ruler: get("ruler").unchecked_into(),
             document,
         }
     }
@@ -109,6 +115,17 @@ impl Page {
         }
     }
 
+    /// How many characters fit across the paper, up to the original 80.
+    fn columns(&self) -> usize {
+        let char_width = self.ruler.get_bounding_client_rect().width() / 100.0;
+        let fit = f64::from(self.measure.client_width()) / char_width;
+        if fit.is_finite() {
+            (fit.floor() as usize).clamp(20, 80)
+        } else {
+            80
+        }
+    }
+
     fn scroll_to_end(&self) {
         self.paper.set_scroll_top(self.paper.scroll_height());
     }
@@ -136,6 +153,8 @@ fn new_game(app: &Shared) {
         a.typed_ahead.clear();
         a.feed.take();
         a.game = Game::new(a.feed.clone(), a.feed.clone()).with_numbered_prompts();
+        let columns = a.page.columns();
+        a.game.set_columns(columns);
         a.game.start_without_banner().expect("Feed never fails");
     }
     spawn_local(play(app.clone()));
@@ -145,6 +164,9 @@ fn new_game(app: &Shared) {
 fn run_line(app: &Shared, line: &str) {
     let mut a = app.borrow_mut();
     a.page.echo(line);
+    // Measure each time: the window may have been resized or rotated.
+    let columns = a.page.columns();
+    a.game.set_columns(columns);
     a.game.handle_line(line).expect("Feed never fails");
 }
 

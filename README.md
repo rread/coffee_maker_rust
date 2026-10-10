@@ -42,8 +42,9 @@ transcripts in `tests/transcripts/`, derived from the Ada source, check
 this byte for byte.
 
 The browser version drops the opening banner (`Begin`, the dictionary
-size, `***`) and numbers the prompt (`[1] ? `); the game itself is the
-same.
+size, `***`), numbers the prompt (`[1] ? `), and on screens too narrow for
+80 columns (phones) wraps paragraphs to fit, using the same rule. The game
+itself is the same.
 
 ## Playing in a browser
 

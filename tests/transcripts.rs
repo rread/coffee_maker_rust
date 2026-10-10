@@ -56,3 +56,18 @@ fn numbered_prompts() {
     assert_eq!(prompts, ["1", "2", "3", "4", "5"]);
     assert!(out.ends_with("\n---\n[5] ? "), "{out}");
 }
+
+#[test]
+fn narrower_columns() {
+    let mut out = Vec::new();
+    let mut game = Game::new(&mut out, NoPause);
+    game.set_columns(40);
+    game.start_without_banner().unwrap();
+    game.handle_line("read note").unwrap();
+    let out = String::from_utf8(out).unwrap();
+    assert!(out.lines().all(|l| l.len() <= 40), "{out}");
+    assert!(
+        out.starts_with("You are in a huge kitchen with\nred-brick walls."),
+        "{out}"
+    );
+}
