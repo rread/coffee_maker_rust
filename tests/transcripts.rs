@@ -12,9 +12,7 @@ fn check(name: &str) {
     let input = fs::read(dir.join(format!("{name}.in"))).unwrap();
     let expected = fs::read(dir.join(format!("{name}.out"))).unwrap();
     let mut out = Vec::new();
-    Game::new(input.as_slice(), &mut out, NoPause)
-        .run()
-        .unwrap();
+    Game::new(&mut out, NoPause).run(input.as_slice()).unwrap();
     if out != expected {
         let actual = dir.join(format!("{name}.actual"));
         fs::write(&actual, &out).unwrap();
@@ -41,3 +39,20 @@ transcripts!(
     wash_search,
     wrap
 );
+
+#[test]
+fn numbered_prompts() {
+    let mut out = Vec::new();
+    let mut game = Game::new(&mut out, NoPause).with_numbered_prompts();
+    game.start_without_banner().unwrap();
+    for line in ["look note", "", "take the mug now", "xyzzy"] {
+        game.handle_line(line).unwrap();
+    }
+    let out = String::from_utf8(out).unwrap();
+    let prompts: Vec<_> = out
+        .lines()
+        .filter_map(|l| l.strip_prefix("[")?.split_once("] ? ").map(|(n, _)| n))
+        .collect();
+    assert_eq!(prompts, ["1", "2", "3", "4", "5"]);
+    assert!(out.ends_with("\n---\n[5] ? "), "{out}");
+}

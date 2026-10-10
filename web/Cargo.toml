@@ -1,0 +1,12 @@
+[package]
+name = "coffee_maker_web"
+version = "0.1.0"
+edition = "2024"
+license = "GPL-3.0-only"
+
+[dependencies]
+coffee_maker_tables = { version = "0.1.0", path = ".." }
+gloo-timers = { version = "0.4.0", features = ["futures"] }
+wasm-bindgen = "0.2.129"
+wasm-bindgen-futures = "0.4.79"
+web-sys = { version = "0.3.106", features = ["Window", "Document", "Element", "HtmlElement", "HtmlInputElement", "HtmlButtonElement", "KeyboardEvent", "Node", "Text", "EventTarget", "Event"] }

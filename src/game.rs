@@ -16,10 +16,9 @@ const LINE_PAUSE: Duration = Duration::from_millis(100);
 const COMMAND_PAUSE: Duration = Duration::from_millis(500);
 
 /// A procedure that acts on a Command.
-type Action<R, W, P> = fn(&mut Game<R, W, P>, &Command) -> io::Result<()>;
+type Action<W, P> = fn(&mut Game<W, P>, &Command) -> io::Result<()>;
 
-pub struct Game<R, W, P> {
-    input: R,
+pub struct Game<W, P> {
     out: W,
     pacer: P,
 
@@ -39,14 +38,20 @@ pub struct Game<R, W, P> {
     targets_down: ThingToThing,
     words: Words,
     /// For each Thing, what to do when a Command uses it as the verb.
-    actions: EnumMap<Thing, Action<R, W, P>>,
+    actions: EnumMap<Thing, Action<W, P>>,
+    /// The player reached the sun room.
     is_done: bool,
+    /// `End` has been printed; no more input is accepted.
+    finished: bool,
+    /// Show the number of the next input line in the prompt, e.g. `[3] ? `.
+    numbered_prompts: bool,
+    /// Lines the player has entered so far.
+    lines_entered: u32,
 }
 
-impl<R: BufRead, W: Write, P: Pacer> Game<R, W, P> {
-    pub fn new(input: R, out: W, pacer: P) -> Self {
+impl<W: Write, P: Pacer> Game<W, P> {
+    pub fn new(out: W, pacer: P) -> Self {
         Game {
-            input,
             out,
             pacer,
             name: tables::name(),
@@ -86,11 +91,33 @@ impl<R: BufRead, W: Write, P: Pacer> Game<R, W, P> {
                 _ => Self::not_a_verb_action,
             },
             is_done: false,
+            finished: false,
+            numbered_prompts: false,
+            lines_entered: 0,
         }
     }
 
+    /// Number each prompt with the input line it's waiting for: `[1] ? `,
+    /// `[2] ? `, and so on. The original prompt is just `? `.
+    pub fn with_numbered_prompts(mut self) -> Self {
+        self.numbered_prompts = true;
+        self
+    }
+
     /// Play until the player wins, types `@quit`, or input ends.
-    pub fn run(&mut self) -> io::Result<()> {
+    pub fn run(&mut self, mut input: impl BufRead) -> io::Result<()> {
+        self.start()?;
+        while !self.finished {
+            match read_line(&mut input)? {
+                Some(line) => self.handle_line(&line)?,
+                None => self.end()?,
+            }
+        }
+        Ok(())
+    }
+
+    /// Print the original's banner, then the first room and prompt.
+    pub fn start(&mut self) -> io::Result<()> {
         writeln!(self.out, "Begin")?;
         writeln!(
             self.out,
@@ -98,38 +125,59 @@ impl<R: BufRead, W: Write, P: Pacer> Game<R, W, P> {
             self.words.len()
         )?;
         writeln!(self.out, "***")?;
+        self.start_without_banner()
+    }
+
+    /// Print the first room and prompt, skipping the banner.
+    pub fn start_without_banner(&mut self) -> io::Result<()> {
         self.look_here()?;
-        while !self.is_done {
-            writeln!(self.out, "---")?;
-            write!(self.out, "? ")?;
-            self.out.flush()?;
-            let Some(line) = self.read_line()? else { break };
-            if line == "@quit" {
-                break;
+        self.prompt()
+    }
+
+    /// Act on one line typed by the player, then prompt for the next, or
+    /// print `End` if the game is over.
+    pub fn handle_line(&mut self, line: &str) -> io::Result<()> {
+        if self.finished {
+            return Ok(());
+        }
+        self.lines_entered += 1;
+        if line == "@quit" {
+            return self.end();
+        }
+        match self.words.parse(line) {
+            Ok(c) => {
+                self.pacer.pause(COMMAND_PAUSE);
+                self.do_command(&c)?;
             }
-            match self.words.parse(&line) {
-                Ok(c) => {
-                    self.pacer.pause(COMMAND_PAUSE);
-                    self.do_command(&c)?;
-                }
-                Err(TooManyWords) => {
-                    writeln!(self.out, "Nope!  I'm a 2-word parser.  Try again.")?;
-                }
+            Err(TooManyWords) => {
+                writeln!(self.out, "Nope!  I'm a 2-word parser.  Try again.")?;
             }
         }
-        writeln!(self.out, "End")?;
+        self.prompt()
+    }
+
+    /// True once `End` has been printed.
+    pub fn is_finished(&self) -> bool {
+        self.finished
+    }
+
+    fn prompt(&mut self) -> io::Result<()> {
+        if self.is_done {
+            return self.end();
+        }
+        writeln!(self.out, "---")?;
+        if self.numbered_prompts {
+            write!(self.out, "[{}] ? ", self.lines_entered + 1)?;
+        } else {
+            write!(self.out, "? ")?;
+        }
         self.out.flush()
     }
 
-    fn read_line(&mut self) -> io::Result<Option<String>> {
-        let mut buf = Vec::new();
-        if self.input.read_until(b'\n', &mut buf)? == 0 {
-            return Ok(None);
-        }
-        if buf.last() == Some(&b'\n') {
-            buf.pop();
-        }
-        Ok(Some(String::from_utf8_lossy(&buf).into_owned()))
+    fn end(&mut self) -> io::Result<()> {
+        self.finished = true;
+        writeln!(self.out, "End")?;
+        self.out.flush()
     }
 
     fn do_command(&mut self, c: &Command) -> io::Result<()> {
@@ -497,4 +545,16 @@ impl<R: BufRead, W: Write, P: Pacer> Game<R, W, P> {
     fn unsupplied_action(&mut self, _: &Command) -> io::Result<()> {
         writeln!(self.out, "Hum dee dum dum do hum.")
     }
+}
+
+/// Read one line, without its `\n`. `None` at end of input.
+fn read_line(input: &mut impl BufRead) -> io::Result<Option<String>> {
+    let mut buf = Vec::new();
+    if input.read_until(b'\n', &mut buf)? == 0 {
+        return Ok(None);
+    }
+    if buf.last() == Some(&b'\n') {
+        buf.pop();
+    }
+    Ok(Some(String::from_utf8_lossy(&buf).into_owned()))
 }

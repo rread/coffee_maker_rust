@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Coffee Maker</title>
+  <meta name="description" content="A tiny 2-word parser game about making a cup of coffee.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <link data-trunk rel="rust" data-wasm-opt="z">
+  <style>
+    :root {
+      --desk: #3a2b22;
+      --desk-ink: #efe6db;
+      --desk-muted: #c4b3a1;
+      --paper: #fbfbf5;
+      --bar: #dceadb;
+      --perf: #c3c6b8;
+      --ink: #2a2931;
+      --ribbon: #b42a1f;
+      --lh: 1.5em;
+      --strip: 2.5em;
+      color-scheme: light;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --desk: #1c1511;
+        --desk-ink: #e6ddd2;
+        --desk-muted: #a8988a;
+        --paper: #23241e;
+        --bar: #2a3427;
+        --perf: #45473d;
+        --ink: #dddbcf;
+        --ribbon: #f07c6e;
+        color-scheme: dark;
+      }
+    }
+
+    html, body { margin: 0; height: 100%; }
+    body {
+      /* 80 columns of text plus gutters and tractor strips = 55em. */
+      font-size: clamp(10px, calc((100vw - 32px) / 55), 16px);
+      font-family: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+      background: var(--desk);
+      color: var(--desk-ink);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    header, footer {
+      box-sizing: border-box;
+      width: min(55em, calc(100vw - 32px));
+      margin: 0 auto;
+    }
+    header { padding: 1.25em 0 0.75em; }
+    h1 {
+      margin: 0;
+      font-size: 1.25em;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+    footer {
+      padding: 0.9em 0 1.25em;
+      color: var(--desk-muted);
+      line-height: 1.6;
+    }
+    footer p { margin: 0; max-width: 60ch; }
+    footer a { color: var(--desk-ink); }
+    footer a:focus-visible, #again:focus-visible {
+      outline: 2px solid var(--desk-ink);
+      outline-offset: 2px;
+    }
+
+    /* Continuous green-bar paper: tractor holes, perforations, and bands
+       three lines deep, all scrolling with the text. */
+    #paper {
+      box-sizing: border-box;
+      width: 55em;
+      max-width: calc(100vw - 32px);
+      margin: 0 auto;
+      overflow: auto;
+      overscroll-behavior: contain;
+      padding: var(--lh) 0;
+      cursor: text;
+      background-color: var(--paper);
+      background-image:
+        radial-gradient(circle, var(--desk) 0 0.42em, transparent 0.46em),
+        radial-gradient(circle, var(--desk) 0 0.42em, transparent 0.46em),
+        repeating-linear-gradient(to bottom, var(--perf) 0 3px, transparent 3px 7px),
+        repeating-linear-gradient(to bottom, var(--perf) 0 3px, transparent 3px 7px),
+        linear-gradient(to bottom, var(--bar) 0 50%, transparent 50% 100%);
+      background-size:
+        var(--strip) calc(var(--lh) * 3),
+        var(--strip) calc(var(--lh) * 3),
+        1px 100%,
+        1px 100%,
+        calc(100% - 2 * var(--strip)) calc(var(--lh) * 6);
+      background-position:
+        left top,
+        right top,
+        var(--strip) 0,
+        calc(100% - var(--strip)) 0,
+        var(--strip) 0;
+      background-repeat: repeat-y;
+      background-attachment: local;
+    }
+
+    #out {
+      margin: 0;
+      padding: 0 calc(var(--strip) + 1em);
+      width: max-content;
+      min-width: 80ch;
+      font: inherit;
+      line-height: var(--lh);
+      white-space: pre;
+      color: var(--ink);
+    }
+    .typed { color: var(--ribbon); }
+
+    #cmd {
+      font: inherit;
+      line-height: var(--lh);
+      height: var(--lh);
+      width: 40ch;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      vertical-align: top;
+      background: transparent;
+      color: var(--ribbon);
+      caret-color: var(--ribbon);
+    }
+    #cmd:focus { outline: none; box-shadow: inset 0 -1px var(--ribbon); }
+
+    .narrow-only { display: none; }
+    @media (max-width: 540px) and (orientation: portrait) {
+      .narrow-only { display: block; }
+    }
+
+    #again {
+      font: inherit;
+      margin-top: 0.75em;
+      padding: 0.4em 1em;
+      border: 0;
+      border-radius: 2px;
+      background: var(--paper);
+      color: var(--ink);
+      cursor: pointer;
+    }
+    #again:hover { background: var(--bar); }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Coffee Maker</h1>
+  </header>
+  <main id="paper">
+    <pre id="out"><input id="cmd" type="text" aria-label="Command" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="send"></pre>
+  </main>
+  <footer>
+    <p>Type one or two words, like <em>look</em>, <em>north</em> or <em>take kettle</em>, and press Enter. Type <em>@quit</em> to stop.</p>
+    <p class="narrow-only">The game prints 80-column lines. Turn your phone sideways to see them whole.</p>
+    <p>A Rust and WebAssembly port of <a href="https://github.com/c3mnr0nz0yfgvxg4gi0sxhnwl9/coffee_maker_ada">coffee_maker_ada</a>, a parser game written in Ada. <a href="https://github.com/rread/coffee_maker_rust">Source code</a>.</p>
+    <button id="again" type="button" hidden>Play again</button>
+  </footer>
+</body>
+</html>

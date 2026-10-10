@@ -1,9 +1,12 @@
-# coffee_maker_tables
+# Coffee Maker in Rust
 
-A second Rust port of [coffee_maker_ada](../coffee_maker_ada), this one
-keeping the original's table-based design. Compare with
-[coffee_maker_rs](../coffee_maker_rs), which models the world with
-separate `Room`/`Thing`/`Verb` types instead.
+A Rust port of
+[coffee_maker_ada](https://github.com/c3mnr0nz0yfgvxg4gi0sxhnwl9/coffee_maker_ada),
+a tiny 2-word parser game, keeping the original's table-based design.
+
+**Play it in your browser: <https://rread.github.io/coffee_maker_rust/>**
+
+Or in a terminal:
 
 ```
 cargo run --release
@@ -32,7 +35,37 @@ procedure of the same name.
 
 ## Fidelity
 
-Same as `coffee_maker_rs`: the game logic, messages, wrapping and pacing
-match the Ada original. The only differences are that whole lines are read
-(no 100-character buffer) and end of input quits cleanly. Both ports pass
-the same golden transcripts in `tests/transcripts/`.
+The terminal version's game logic, messages (typos included), wrapping and
+pacing match the Ada original. The only differences are that whole lines
+are read (no 100-character buffer) and end of input quits cleanly. Golden
+transcripts in `tests/transcripts/`, derived from the Ada source, check
+this byte for byte.
+
+The browser version drops the opening banner (`Begin`, the dictionary
+size, `***`) and numbers the prompt (`[1] ? `); the game itself is the
+same.
+
+## Playing in a browser
+
+`web/` is a WebAssembly front end that prints the game onto green-bar
+printer paper, keeping the original pacing. It drives the same library
+through `Game::start` and `Game::handle_line`; the game's pauses become
+browser timers.
+
+It needs the `wasm32-unknown-unknown` target and
+[trunk](https://trunkrs.dev):
+
+```
+cd web
+trunk serve --open                         # play locally
+trunk build --release --public-url ./      # static site in web/dist/
+```
+
+`web/dist/` is a self-contained static site (HTML, JS, and a ~80 KB
+`.wasm`) that can be hosted anywhere, including GitHub Pages. The relative
+`--public-url` makes it work under any repository path.
+
+## License
+
+GPL-3.0, the same as the Ada original this is ported from. See
+[LICENSE](LICENSE).
