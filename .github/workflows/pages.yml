@@ -15,20 +15,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+
   build:
+    needs: ci
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
 
       - name: Install Rust
         run: |
-          rustup toolchain install stable --profile minimal --component clippy --target wasm32-unknown-unknown
+          rustup toolchain install stable --profile minimal --target wasm32-unknown-unknown
           rustup default stable
-
-      - name: Test
-        run: |
-          cargo test
-          cargo clippy --all-targets -- -D warnings
 
       - name: Install trunk
         run: |
