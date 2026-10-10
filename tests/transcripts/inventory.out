@@ -1,0 +1,78 @@
+Begin
+There are 55 words in the dictionary.
+***
+You are in a huge kitchen with red-brick walls.  It has ovens embedded into the
+walls, three on each side.  There's a table near the center of the room.  On
+the table are a stand for an electric kettle & a note next to it.  There are
+open doorways to each of the 4 main compass directions (north, east, south
+west).
+You see a hand-written note.
+---
+? You are carrying 0 items.
+---
+? You are in the dining room.  There's a wooden table in the center of the room.
+The kitchen is to the south.
+You see an electric kettle.
+---
+? kettle: Taken.
+---
+? You are carrying 1 items.  They are...
+* an electric kettle
+---
+? You are in the kitchen.
+---
+? You are in the library.  Tall bookcases line the walls.  There's a ladder on
+casters & attached to a rail that runs around the room so that people
+(including you) can reach even the top shelves.  Good thing, that, as those
+shelves are too high for even the tallest person you've ever met to reach.  The
+kitchen is to the west.
+You see a pour-over funnel that needs cleaning.
+---
+? filter: Taken.
+---
+? I don't see any funnel here.
+---
+? You are carrying 2 items.  They are...
+* an electric kettle
+* a pour-over funnel that needs cleaning
+---
+? filter: Dropped.
+---
+? You are in the library.  Tall bookcases line the walls.  There's a ladder on
+casters & attached to a rail that runs around the room so that people
+(including you) can reach even the top shelves.  Good thing, that, as those
+shelves are too high for even the tallest person you've ever met to reach.  The
+kitchen is to the west.
+You see a pour-over funnel that needs cleaning.
+---
+? You are carrying 1 items.  They are...
+* an electric kettle
+---
+? kettle: Dropped.
+---
+? You are in the library.  Tall bookcases line the walls.  There's a ladder on
+casters & attached to a rail that runs around the room so that people
+(including you) can reach even the top shelves.  Good thing, that, as those
+shelves are too high for even the tallest person you've ever met to reach.  The
+kitchen is to the west.
+You see an electric kettle, a pour-over funnel that needs cleaning.
+---
+? kettle: Taken.
+---
+? You are in the kitchen.
+---
+? The electric kettle fits snuggly into its stand & is ready to boil water when
+you're ready to make coffee!
+---
+? You can't take that.
+---
+? You are in a huge kitchen with red-brick walls.  It has ovens embedded into the
+walls, three on each side.  There's a table near the center of the room.  On
+the table are a stand for an electric kettle & a note next to it.  There are
+open doorways to each of the 4 main compass directions (north, east, south
+west).
+You see an electric kettle, a hand-written note.
+---
+? You are carrying 0 items.
+---
+? End

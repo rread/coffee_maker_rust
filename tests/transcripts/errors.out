@@ -1,0 +1,129 @@
+Begin
+There are 55 words in the dictionary.
+***
+You are in a huge kitchen with red-brick walls.  It has ovens embedded into the
+walls, three on each side.  There's a table near the center of the room.  On
+the table are a stand for an electric kettle & a note next to it.  There are
+open doorways to each of the 4 main compass directions (north, east, south
+west).
+You see a hand-written note.
+---
+? Hum dee dum dum do hum.
+---
+? Hum dee dum dum do hum.
+---
+? "Look" is not a verb!
+---
+? "LOOK" is not a verb!
+---
+? "xyzzy" is not a verb!
+---
+? "kettle" is not a verb!
+---
+? "here" is not a verb!
+---
+? "lock" is not a verb!
+---
+? "unlock" is not a verb!
+---
+? "use" is not a verb!
+---
+? Nope!  I'm a 2-word parser.  Try again.
+---
+? "look	note" is not a verb!
+---
+? FIXME Drink_Action
+---
+? FIXME Drink_Action
+---
+? FIXME You wipe .
+---
+? FIXME You wipe table.
+---
+? Take what?
+---
+? What is a xyzzy?
+---
+? You can't take that.
+---
+? I don't see any kettle here.
+---
+? I don't see any north here.
+---
+? I don't see any here here.
+---
+? You can't take that.
+---
+? Drop what?
+---
+? What is a xyzzy?
+---
+? You aren't carrying any note.
+---
+? You aren't carrying any me.
+---
+? Read what?
+---
+? What is a "xyzzy"?
+---
+? I don't see any kettle here.
+---
+? a respectable person
+---
+? I don't see any xyzzy here.
+---
+? I don't see any kettle here.
+---
+? a respectable person
+---
+? You are in a huge kitchen with red-brick walls.  It has ovens embedded into the
+walls, three on each side.  There's a table near the center of the room.  On
+the table are a stand for an electric kettle & a note next to it.  There are
+open doorways to each of the 4 main compass directions (north, east, south
+west).
+You see a hand-written note.
+---
+? You are in a huge kitchen with red-brick walls.  It has ovens embedded into the
+walls, three on each side.  There's a table near the center of the room.  On
+the table are a stand for an electric kettle & a note next to it.  There are
+open doorways to each of the 4 main compass directions (north, east, south
+west).
+You see a hand-written note.
+---
+? In an admirably controlled hand, someone has written "To make coffee, you will
+need the electric kettle, a mug, a pour-over funnel with built-in filter, & of
+course some ground coffee."
+---
+? Search what?
+---
+? What is a xyzzy?
+---
+? You aren't carrying any kettle, & there isn't one here in the room.
+---
+? Searching note doesn't reveal anything.
+---
+? Searching me doesn't reveal anything.
+---
+? You can't wash it if you aren't carrying it.
+---
+? What is a xyzzy?
+---
+? You can't wash it if you aren't carrying it.
+---
+? You could make coffee if you have all 4 of the items & you are in the kitchen,
+but I'm not aware of anything else you could make in this game.  Sorry.
+---
+? You could make coffee if you have all 4 of the items & you are in the kitchen,
+but I'm not aware of anything else you could make in this game.  Sorry.
+---
+? "" isn't a direction.---
+? "xyzzy" isn't a direction.---
+? "note" isn't a direction.---
+? "walk" isn't a direction.---
+? You can't go that way.
+---
+? "@quit" is not a verb!
+---
+? "@quit" is not a verb!
+---
+? End

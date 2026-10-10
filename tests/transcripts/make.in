@@ -1,0 +1,34 @@
+make
+n
+make coffee
+take kettle
+s
+make coffee
+drop kettle
+make coffee
+w
+take mug
+e
+make coffee
+wash mug
+make coffee
+e
+take funnel
+w
+make coffee
+wash filter
+make coffee
+d
+search sack
+look
+take coffee
+search sack
+u
+drop mug
+make coffee
+i
+drop coffee
+make coffee
+look coffee
+look
+up

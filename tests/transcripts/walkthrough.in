@@ -1,0 +1,19 @@
+read note
+north
+take kettle
+south
+east
+take funnel
+west
+west
+take mug
+east
+down
+take bag
+search bag
+up
+wash mug
+wash funnel
+drop kettle
+make coffee
+up
