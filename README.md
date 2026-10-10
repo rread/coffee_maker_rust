@@ -3,6 +3,8 @@
 A Rust port of
 [coffee_maker_ada](https://github.com/c3mnr0nz0yfgvxg4gi0sxhnwl9/coffee_maker_ada),
 a tiny 2-word parser game, keeping the original's table-based design.
+For a more idiomatic port with separate `Room`, `Thing` and `Verb` types,
+see [coffee_maker_rs](https://github.com/rread/coffee_maker_rs).
 
 **Play it in your browser: <https://rread.github.io/coffee_maker_rust/>**
 
